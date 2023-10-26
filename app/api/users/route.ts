@@ -10,7 +10,9 @@ import { instance } from "@/utils/supabase";
 
 export async function GET(request: NextRequest) {
   try {
-    //const proxyAgent = new HttpsProxyAgent("69.30.217.114:17021");
+    const proxyAgent = undefined; //new HttpsProxyAgent(
+    //   "http://iyycoyaf-US-AU-CA-GB-rotate:8qo189gabi6x@p.webshare.io:80/"
+    // );
     const { data } = await instance
       .from("users")
       .select("id, username, email, token, skipped")
@@ -33,7 +35,7 @@ export async function GET(request: NextRequest) {
       throw Error("csrf token is missing.");
     }
 
-    await sleep(5000);
+    await sleep(6000);
     const password = "4d57ca3a-49ca-4f02-9c89-8c32d7a33354";
     const postdata = {
       authenticity_token: csrf,
@@ -55,18 +57,19 @@ export async function GET(request: NextRequest) {
         "User-agent": randomUserAgent.getRandom(),
         "Content-type": "application/x-www-form-urlencoded",
       },
-      //agent: proxyAgent,
+      agent: proxyAgent,
     });
     const body = await output.text();
     const token = body.match(/(?<=access_token\":\").*?(?=\")/gs);
     const now = new Date().toISOString();
 
     if (!token) {
+      console.log(body, "body");
       await instance
         .from("users")
         .update({ skipped: true, updated_at: now })
         .eq("id", user?.id);
-      throw Error("failed to register ");
+      throw Error("failed to register");
     }
 
     await instance

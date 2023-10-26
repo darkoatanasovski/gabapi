@@ -10,7 +10,7 @@ import { instance } from "@/utils/supabase";
 
 export async function GET(request: NextRequest) {
   try {
-    //const proxyAgent = new HttpsProxyAgent("http://reedee.co:9999");
+    //const proxyAgent = new HttpsProxyAgent("69.30.217.114:17021");
     const { data } = await instance
       .from("users")
       .select("id, username, email, token, skipped")
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       };
       await instance.from("users").insert(user);
       console.log(`new user: ${JSON.stringify(user)}`);
-      await sleep(2000);
+      await sleep(1000);
     }
   }
 }

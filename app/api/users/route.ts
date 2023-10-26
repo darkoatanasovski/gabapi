@@ -10,9 +10,7 @@ import { instance } from "@/utils/supabase";
 
 export async function GET(request: NextRequest) {
   try {
-    const proxyAgent = undefined; //new HttpsProxyAgent(
-    //   "http://iyycoyaf-US-AU-CA-GB-rotate:8qo189gabi6x@p.webshare.io:80/"
-    // );
+    const proxyAgent = new HttpsProxyAgent("http://163.172.214.121:17060/");
     const { data } = await instance
       .from("users")
       .select("id, username, email, token, skipped")

@@ -5,12 +5,9 @@ import { fetch, CookieJar } from "node-fetch-cookies";
 
 export async function GET(request: NextRequest) {
   const withProxy = request.nextUrl.searchParams.get("proxy");
-  const proxyAgent = new HttpsProxyAgent(
-    "http://iyycoyaf-US-AU-CA-GB-rotate:8qo189gabi6x@p.webshare.io:80/",
-    {
-      keepAlive: true,
-    }
-  );
+  const proxyAgent = new HttpsProxyAgent("http://163.172.214.121:17060/", {
+    keepAlive: true,
+  });
   const cookies = new CookieJar("");
   const out = await fetch(cookies, "https://api.ipify.org?format=json", {
     agent: withProxy ? proxyAgent : undefined,

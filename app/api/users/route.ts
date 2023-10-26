@@ -2,10 +2,10 @@ import { fetch, CookieJar } from "node-fetch-cookies";
 import * as cheerio from "cheerio";
 import randomUserAgent from "random-useragent";
 import { HttpsProxyAgent } from "https-proxy-agent";
-
+import * as users from "@/assets/users.json";
 import { NextRequest, NextResponse } from "next/server";
 import { BASE_URL } from "@/utils/constants";
-import { encodeFormData, sleep } from "@/utils/helper";
+import { encodeFormData, random, sleep } from "@/utils/helper";
 import { instance } from "@/utils/supabase";
 
 export async function GET(request: NextRequest) {
@@ -81,5 +81,28 @@ export async function GET(request: NextRequest) {
     );
   } catch (e: any) {
     return NextResponse.json({ error: e.message }, { status: 422 });
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const mailproviders = [
+    "@gmail.com",
+    "@yahoo.com",
+    "@hotmail.com",
+    "@live.com",
+  ];
+  for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < users.length; i++) {
+      const user = {
+        username: users[i].toLocaleLowerCase() + random(9999, 99999),
+        email:
+          users[i].toLocaleLowerCase() +
+          random(9999, 99999) +
+          mailproviders[random(0, mailproviders.length - 1)],
+      };
+      await instance.from("users").insert(user);
+      console.log(`new user: ${JSON.stringify(user)}`);
+      await sleep(2000);
+    }
   }
 }

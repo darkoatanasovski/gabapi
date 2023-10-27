@@ -8,10 +8,9 @@ export async function GET(request: NextRequest) {
     keepAlive: true,
   });
   const cookies = new CookieJar("");
-  const out = await fetch(cookies, "https://api.ipify.org?format=json", {
+  const out = await fetch(cookies, "https://api.myip.com/", {
     agent: withProxy ? proxyAgent : undefined,
   });
-  const output = await out.json();
-  console.log(output, "output");
-  return NextResponse.json(output, { status: 200 });
+
+  return NextResponse.json(await out.json(), { status: 200 });
 }

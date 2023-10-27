@@ -4,7 +4,13 @@ import randomUserAgent from "random-useragent";
 import { HttpsProxyAgent } from "https-proxy-agent";
 import { NextRequest, NextResponse } from "next/server";
 import { BASE_URL } from "@/utils/constants";
-import { encodeFormData, random, sleep } from "@/utils/helper";
+import {
+  encodeFormData,
+  formatUsername,
+  getRandomAvatar,
+  random,
+  sleep,
+} from "@/utils/helper";
 import { instance } from "@/utils/supabase";
 import FormData from "form-data";
 
@@ -83,17 +89,21 @@ export async function POST(request: NextRequest) {
     user!.token = token[0];
 
     //Uncomment this if you want to update user info
-    // await sleep(random(2, 5) * 1000);
-    // const fd = new FormData();
-    // fd.append("display_name", user?.username.replace(/\d+/g, ""));
-    // fd.append("note", "Welcome to my Gab profile.");
-    // await fetch(cookies, `${BASE_URL}/api/v1/accounts/update_credentials`, {
-    //   method: "patch",
-    //   headers: {
-    //     Authorization: `Bearer ${user?.token}`,
-    //   },
-    //   body: fd,
-    // });
+
+    await sleep(random(2, 5) * 1000);
+    const fd = new FormData();
+    fd.append("display_name", formatUsername(user?.username));
+    //fd.append("note", "Welcome to my Gab profile.");
+    fd.append("avatar", await getRandomAvatar());
+    await fetch(cookies, `${BASE_URL}/api/v1/accounts/update_credentials`, {
+      method: "patch",
+      headers: {
+        "User-Agent": userAgent,
+        Authorization: `Bearer ${user?.token}`,
+      },
+      body: fd,
+      agent: proxyAgent,
+    });
 
     return NextResponse.json(
       { status: output.status, user },

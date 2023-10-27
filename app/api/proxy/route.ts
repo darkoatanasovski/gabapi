@@ -4,7 +4,7 @@ import { fetch, CookieJar } from "node-fetch-cookies";
 
 export async function GET(request: NextRequest) {
   const withProxy = request.nextUrl.searchParams.get("proxy");
-  const proxyAgent = new HttpsProxyAgent("http://163.172.214.121:17060/", {
+  const proxyAgent = new HttpsProxyAgent(process.env.PROXY_URL || "", {
     keepAlive: true,
   });
   const cookies = new CookieJar("");

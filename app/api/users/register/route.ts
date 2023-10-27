@@ -11,7 +11,7 @@ import FormData from "form-data";
 export async function POST(request: NextRequest) {
   try {
     const userAgent = randomUserAgent.getRandom();
-    const proxyAgent = new HttpsProxyAgent("http://163.172.214.121:17060/");
+    const proxyAgent = new HttpsProxyAgent(process.env.PROXY_URL || "");
     const { data } = await instance
       .from("users")
       .select("id, username, email, token, skipped")

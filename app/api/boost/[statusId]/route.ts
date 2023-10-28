@@ -13,7 +13,7 @@ import {
 
 const PROXY_AGENT = new HttpsProxyAgent(process.env.PROXY_URL || "");
 const COOKIES = new CookieJar("");
-const CONCURRENCY = 3;
+const CONCURRENCY = 2;
 
 export async function GET(
   request: NextRequest,
@@ -76,30 +76,32 @@ const boostActions = async (user: any, statusId: any) => {
     quotes: favouriteResponse?.quotes_count,
   });
 
-  // if (favouriteResponse.account_id) {
-  //   const relationships = await fetch(
-  //     COOKIES,
-  //     `${BASE_URL}/api/v1/accounts/relationships`,
-  //     {
-  //       ...postRequestOptions,
-  //       body: JSON.stringify({
-  //         accountIds: [`${favouriteResponse.account_id}`],
-  //       }),
-  //     }
-  //   );
-  //   await sleep(2000);
-
-  //   if (!relationships[0]?.following) {
-  //     const follow = await fetch(
+  // if (shouldReblog) {
+  //   if (favouriteResponse.account_id) {
+  //     const relationships = await fetch(
   //       COOKIES,
-  //       `${BASE_URL}/api/v1/accounts/${favouriteResponse.account_id}/follow`,
-  //       postRequestOptions
+  //       `${BASE_URL}/api/v1/accounts/relationships`,
+  //       {
+  //         ...postRequestOptions,
+  //         body: JSON.stringify({
+  //           accountIds: [`${favouriteResponse.account_id}`],
+  //         }),
+  //       }
   //     );
-  //     const followResponse = await follow.json();
-  //     console.log(followResponse, " follow");
-  //   }
+  //     await sleep(2000);
 
-  //   await sleep(2000);
+  //     if (!relationships[0]?.following) {
+  //       const follow = await fetch(
+  //         COOKIES,
+  //         `${BASE_URL}/api/v1/accounts/${favouriteResponse.account_id}/follow`,
+  //         postRequestOptions
+  //       );
+  //       const followResponse = await follow.json();
+  //       console.log(followResponse, " follow");
+  //     }
+
+  //     await sleep(2000);
+  //   }
   // }
 
   if (shouldReblog) {
@@ -110,41 +112,43 @@ const boostActions = async (user: any, statusId: any) => {
     );
     const reblogResponse = await reblog.json();
     console.log(reblogResponse, " reblog");
-    await sleep(1000);
+    await sleep(2000);
   }
 
-  if (shouldQuote) {
-    const comment = COMMENTS[random(0, COMMENTS.length - 1)];
-    console.log(comment, " comment");
-    console.log(
-      JSON.stringify(commentPayload({ statusId, comment, type: "quote" })),
-      " payload comment"
-    );
+  // if (shouldQuote) {
+  //   const comment = COMMENTS[random(0, COMMENTS.length - 1)];
+  //   console.log(comment, " comment");
+  //   console.log(
+  //     JSON.stringify(commentPayload({ statusId, comment, type: "quote" })),
+  //     " payload comment"
+  //   );
 
-    const quote = await fetch(COOKIES, `${BASE_URL}/api/v1/statuses`, {
-      ...postRequestOptions,
-      body: JSON.stringify(
-        commentPayload({ statusId, comment, type: "quote" })
-      ),
-    });
+  //   const quote = await fetch(COOKIES, `${BASE_URL}/api/v1/statuses`, {
+  //     ...postRequestOptions,
+  //     body: JSON.stringify(
+  //       commentPayload({ statusId, comment, type: "quote" })
+  //     ),
+  //   });
 
-    const quoteResponse = await quote.json();
-    console.log(quoteResponse, " quote status");
-  } else if (shouldReply) {
-    const comment = COMMENTS[random(0, COMMENTS.length - 1)];
-    const reply = await fetch(COOKIES, `${BASE_URL}/api/v1/statuses`, {
-      ...postRequestOptions,
-      body: JSON.stringify(
-        commentPayload({ statusId, comment, type: "reply" })
-      ),
-    });
+  //   const quoteResponse = await quote.json();
+  //   console.log(quoteResponse, " quote status");
+  //   await sleep(2000);
+  // } else if (shouldReply) {
+  //   const comment = COMMENTS[random(0, COMMENTS.length - 1)];
+  //   const reply = await fetch(COOKIES, `${BASE_URL}/api/v1/statuses`, {
+  //     ...postRequestOptions,
+  //     body: JSON.stringify(
+  //       commentPayload({ statusId, comment, type: "reply" })
+  //     ),
+  //   });
 
-    const replyResponse = await reply.json();
-    console.log(replyResponse, " reply status");
+  //   const replyResponse = await reply.json();
+  //   console.log(replyResponse, " reply status");
+  //   await sleep(2000);
 
-    await instance
-      .from("users")
-      .update({ last_action_at: new Date().toISOString() })
-      .eq("id", user?.id);
-  }
+  // }
+  await instance
+    .from("users")
+    .update({ last_action_at: new Date().toISOString() })
+    .eq("id", user?.id);
 };

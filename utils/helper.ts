@@ -54,9 +54,9 @@ export const shouldBoostExtras = ({
 }): { shouldReblog: boolean; shouldReply: boolean; shouldQuote: boolean } => {
   const total = likes;
 
-  const reblogsThreshold = 60;
-  const repliesThreshold = 0;
-  const quotesThreshold = 0;
+  const reblogsThreshold = 30;
+  const repliesThreshold = 2;
+  const quotesThreshold = 1;
 
   const reblogsPercentage = (reblogs / total) * 100;
   const repliesPercentage = (replies / total) * 100;
@@ -66,6 +66,7 @@ export const shouldBoostExtras = ({
     shouldReblog: false,
     shouldReply: false,
     shouldQuote: false,
+    shouldFollow: false,
   };
 
   if (reblogsPercentage < reblogsThreshold) {

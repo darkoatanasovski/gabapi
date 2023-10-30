@@ -7,25 +7,21 @@ import { BASE_URL } from "@/utils/constants";
 import {
   encodeFormData,
   formatUsername,
+  generateRandomUser,
   getRandomAvatar,
   random,
   sleep,
 } from "@/utils/helper";
 import { instance } from "@/utils/supabase";
 import FormData from "form-data";
+import * as notes from "@/assets/notes.json";
 
 export async function POST(request: NextRequest) {
   try {
     const userAgent = randomUserAgent.getRandom();
     const proxyAgent = new HttpsProxyAgent(process.env.PROXY_URL || "");
-    const { data } = await instance
-      .from("users")
-      .select("id, username, email, token, skipped")
-      .is("token", null)
-      .is("skipped", false)
-      .order("id", { ascending: true })
-      .limit(1);
-    const user = data?.[0];
+
+    const user = generateRandomUser();
     const cookies = new CookieJar("");
     const { captcha } = await request.json();
 
@@ -48,8 +44,8 @@ export async function POST(request: NextRequest) {
     const password = "4d57ca3a-49ca-4f02-9c89-8c32d7a33354";
     const postdata = {
       authenticity_token: csrf,
-      "user[account_attributes][username]": user?.username,
-      "user[email]": user?.email,
+      "user[account_attributes][username]": user.username,
+      "user[email]": user.email,
       "user[password]": password,
       "user[password_confirmation]": password,
       "cf-turnstile-response": captcha,
@@ -71,8 +67,8 @@ export async function POST(request: NextRequest) {
     const body = await output.text();
     const token = body.match(/(?<=access_token\":\").*?(?=\")/gs);
     const now = new Date().toISOString();
-
-    if (!token) {
+    user.token = token?.[0];
+    if (!user.token) {
       console.log(body, "body");
       await instance
         .from("users")
@@ -81,19 +77,12 @@ export async function POST(request: NextRequest) {
       throw Error("failed to register");
     }
 
-    await instance
-      .from("users")
-      .update({ token: token[0], updated_at: now })
-      .eq("id", user?.id);
-
-    user!.token = token[0];
-
-    //Uncomment this if you want to update user info
+    await instance.from("users").insert(user);
 
     await sleep(random(2, 5) * 1000);
     const fd = new FormData();
     fd.append("display_name", formatUsername(user?.username));
-    //fd.append("note", "Welcome to my Gab profile.");
+    fd.append("note", notes[random(0, notes.length - 1)]);
     fd.append("avatar", await getRandomAvatar());
     await fetch(cookies, `${BASE_URL}/api/v1/accounts/update_credentials`, {
       method: "patch",

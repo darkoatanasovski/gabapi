@@ -1,4 +1,6 @@
 import sharp from "sharp";
+import * as users from "@/assets/users.json";
+import { User } from "@/types";
 
 export const encodeFormData = (data: Record<string, string | number>) => {
   const encoded = [];
@@ -39,4 +41,13 @@ export const getRandomAvatar = async () => {
         .toBuffer()
     ).toString("base64")
   );
+};
+
+export const generateRandomUser = (): User => {
+  const user = users[random(0, users.length - 1)].toLocaleLowerCase();
+  const emls = ["@gmail.com", "@yahoo.com", "@hotmail.com", "@live.com"];
+  return {
+    username: user + random(999, 99999),
+    email: user + random(999, 99999) + emls[random(0, emls.length - 1)],
+  };
 };

@@ -70,17 +70,15 @@ const boostActions = async (user: any, statusId: any) => {
     `${BASE_URL}/api/v1/statuses/${statusId}/favourite`,
     postRequestOptions
   );
-
+  const favouriteResponse = await favourite.json();
+  console.log(favouriteResponse, " favourite");
   if (favourite.status === 403) {
-    console.log(JSON.stringify(await favourite.json()), " favorite status");
-
     console.log("delete user: ", user);
     await instance.from("users").delete().eq("id", user?.id);
     await sleep(random(5, 10) * 1000);
     return;
   }
 
-  const favouriteResponse = await favourite.json();
   const { shouldReblog, shouldReply, shouldQuote } = shouldBoostExtras({
     likes: favouriteResponse?.favourites_count,
     reblogs: favouriteResponse?.reblogs_count,

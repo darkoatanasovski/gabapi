@@ -13,7 +13,7 @@ import {
 
 const PROXY_AGENT = new HttpsProxyAgent(process.env.PROXY_URL || "");
 const COOKIES = new CookieJar("");
-const CONCURRENCY = 2;
+const CONCURRENCY = 1;
 
 export async function GET(
   request: NextRequest,
@@ -27,6 +27,7 @@ export async function GET(
     .not("token", "is", null)
     .limit(parseInt(limit))
     .order("last_action_at", { ascending: true });
+
   const users = data;
 
   if (!users?.length) {
@@ -54,6 +55,16 @@ const boostActions = async (user: any, statusId: any) => {
     agent: PROXY_AGENT,
   };
 
+  const details = await fetch(
+    null,
+    `${BASE_URL}/api/v1/account_by_username/${user.username}`
+  );
+  if ((await details.json()).is_spam) {
+    console.log("delete user: ", user);
+    await instance.from("users").delete().eq("id", user?.id);
+    return;
+  }
+
   const favourite = await fetch(
     COOKIES,
     `${BASE_URL}/api/v1/statuses/${statusId}/favourite`,
@@ -63,8 +74,9 @@ const boostActions = async (user: any, statusId: any) => {
   if (favourite.status === 403) {
     console.log(JSON.stringify(await favourite.json()), " favorite status");
 
-    console.log("delete user: ", JSON.stringify(user));
+    console.log("delete user: ", user);
     await instance.from("users").delete().eq("id", user?.id);
+    await sleep(random(5, 10) * 1000);
     return;
   }
 
@@ -105,6 +117,7 @@ const boostActions = async (user: any, statusId: any) => {
   // }
 
   if (shouldReblog) {
+    await sleep(random(2, 5) * 1000);
     const reblog = await fetch(
       COOKIES,
       `${BASE_URL}/api/v1/statuses/${statusId}/reblog`,
@@ -112,7 +125,6 @@ const boostActions = async (user: any, statusId: any) => {
     );
     const reblogResponse = await reblog.json();
     console.log(reblogResponse, " reblog");
-    await sleep(2000);
   }
 
   // if (shouldQuote) {
@@ -151,4 +163,5 @@ const boostActions = async (user: any, statusId: any) => {
     .from("users")
     .update({ last_action_at: new Date().toISOString() })
     .eq("id", user?.id);
+  await sleep(1000);
 };
